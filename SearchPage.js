@@ -10,23 +10,39 @@ import {
   ActivityIndicator,
   Image
 } from 'react-native';
+import * as utils from './utils';
 
 export default class SearchPage extends Component<{}> {
   constructor (props) {
     super(props);
 
     this.state = {
-      searchString: 'london'
+      searchString: 'london',
+      isLoading: false
     };
   }
 
   onSearchTextChanged = (event) => {
-    console.log('_onSearchTextChanged');
     this.setState({ searchString: event.nativeEvent.text });
-    console.log(`Current: ${this.state.searchString}, Next: ${event.nativeEvent.text}`);
+  }
+
+  executeQuery = (query) => {
+    console.log(query);
+    this.setState({
+      isLoading: true
+    });
+  }
+
+  onSearchPressed = () => {
+    let query = utils.urlForQueryAndPage('place_name', this.state.searchString, 1);
+
+    this.executeQuery(query);
   }
 
   render () {
+    let spinner = this.state.isLoading ? 
+      <ActivityIndicator size='large' style={styles.spinner}/> : null;
+
     return (
       <View style={styles.container}>
         <Text style={styles.description}>
@@ -43,12 +59,13 @@ export default class SearchPage extends Component<{}> {
             placeholder='Search via name or postcode'
           />
           <Button 
-            onPress={() => {}}
+            onPress={this.onSearchPressed}
             color='#48BBEC'
             title='Go'
           />
         </View>
         <Image source={require('./resources/house.png')} style={styles.image}/>
+        {spinner}
       </View>
     );
   }
@@ -86,5 +103,8 @@ const styles = StyleSheet.create({
     width: 217,
     height: 138,
     marginTop: 20
+  },
+  spinner: {
+    marginTop: 25
   }
 })
