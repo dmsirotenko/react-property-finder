@@ -11,14 +11,16 @@ import {
   Image
 } from 'react-native';
 import * as utils from './utils';
+import SearchResults from './SearchResults';
 
 export default class SearchPage extends Component<{}> {
   constructor (props) {
     super(props);
 
     this.state = {
-      searchString: 'london',
-      isLoading: false
+      searchString: 'London',
+      isLoading: false,
+      message: ''
     };
   }
 
@@ -30,6 +32,40 @@ export default class SearchPage extends Component<{}> {
     console.log(query);
     this.setState({
       isLoading: true
+    });
+
+    fetch(query).then(response => response.json())
+      .then(json => this.handleResponse(json.response))
+      .catch(error => {
+        this.setState({
+          isLoading: false,
+          message: `Something bad happened ${error}`
+        });
+      });
+  }
+
+  handleResponse = (response) => {
+    this.setState({
+      isLoading: false,
+      message: ''
+    });
+
+    let message;
+
+    if (response.application_response_code.substr(0, 1) == '1') {
+      this.props.navigator.push({
+        title: 'Results',
+        component: SearchResults,
+        passProps: {
+          listings: response.listings
+        }
+      });
+    } else {
+      message = 'Not found';
+    }
+
+    this.setState({
+      message: message
     });
   }
 
@@ -45,8 +81,8 @@ export default class SearchPage extends Component<{}> {
 
     return (
       <View style={styles.container}>
-        <Text style={styles.description}>
-          Search for houses to buy!
+        <Text style={styles.title}>
+          Property Finder
         </Text>
         <Text style={styles.description}>
           Search by place or postcode.
@@ -66,12 +102,22 @@ export default class SearchPage extends Component<{}> {
         </View>
         <Image source={require('./resources/house.png')} style={styles.image}/>
         {spinner}
+        <Text style={styles.message}>
+          {this.state.message}
+        </Text>
       </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  title: {
+    marginBottom: 20,
+    fontSize: 22,
+    textAlign: 'center',
+    color: '#656565',
+    fontWeight: 'bold'
+  },
   description: {
     marginBottom: 20,
     fontSize: 18,
@@ -106,5 +152,11 @@ const styles = StyleSheet.create({
   },
   spinner: {
     marginTop: 25
+  },
+  message: {
+    marginTop: 20,
+    fontSize: 18,
+    textAlign: 'center',
+    color: '#656565'
   }
 })

@@ -18,7 +18,7 @@ export default class App extends Component<{}> {
       <NavigatorIOS 
       style={styles.container} 
       initialRoute={{
-        title: 'Property Finder',
+        title: 'Search',
         component: SearchPage
       }}/>
     );
